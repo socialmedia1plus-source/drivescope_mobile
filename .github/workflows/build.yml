@@ -16,7 +16,7 @@ jobs:
         uses: actions/setup-java@v4
         with:
           distribution: 'zulu'
-          java-version: '11' # الحفاظ على توافقية إصدار الجافا المستقر
+          java-version: '17' # متوافق تماماً مع متطلبات الـ Gradle في مشروعك
 
       - name: Setup Flutter
         uses: subosito/flutter-action@v2
@@ -26,8 +26,11 @@ jobs:
       - name: Install dependencies
         run: flutter pub get
 
-      - name: Clean Project
-        run: flutter clean # استخدام فلوتر مباشرة للتنظيف لتجنب نقص ملفات جرادل
-
       - name: Build APK
         run: flutter build apk --release
+
+      - name: Upload APK Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: release-apk
+          path: build/app/outputs/flutter-apk/app-release.apk

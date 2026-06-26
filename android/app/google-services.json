@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "356013597330",
+    "project_id": "drivescope-47f3c",
+    "storage_bucket": "drivescope-47f3c.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:356013597330:android:303206344655ca4d22fc4b",
+        "android_client_info": {
+          "package_name": "com.drivescope.drivescope_mobile"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBbc3fomcL_amxzq8Jly9Hm97PSZX-B8pE"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

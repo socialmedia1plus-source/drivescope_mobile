@@ -1,0 +1,10 @@
+{
+  "login": {
+    "title": "Welcome to DriveScope",
+    "subtitle": "The #1 AI Copilot for Professional Drivers",
+    "phone_hint": "Phone Number",
+    "send_code": "Send Verification Code",
+    "verify_code": "Verify & Start",
+    "code_hint": "Enter 6-digit code"
+  }
+}

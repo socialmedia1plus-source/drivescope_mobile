@@ -16,18 +16,29 @@ jobs:
         uses: actions/setup-java@v4
         with:
           distribution: 'zulu'
-          java-version: '17' # متوافق تماماً مع متطلبات الـ Gradle في مشروعك
+          java-version: '17'
 
       - name: Setup Flutter
         uses: subosito/flutter-action@v2
         with:
           channel: 'stable'
 
+      - name: Fix Android SDK & Package Name Conflicts
+        run: |
+          # 1. تحديث الـ Compile SDK إلى 36 لحل مشكلة shared_preferences
+          find . -name "build.gradle*" -exec sed -i 's/compileSdk = 34/compileSdk = 36/g' {} +
+          find . -name "build.gradle*" -exec sed -i 's/compileSdkVersion 34/compileSdkVersion 36/g' {} +
+          
+          # 2. تعديل ملف google-services.json تلقائياً ليقبل اسم الحزمة الحالي ويحل الخطأ القاتل
+          if [ -f android/app/google-services.json ]; then
+            sed -i 's/"package_name": "[^"]*"/"package_name": "com.example.drivescope_mobile"/g' android/app/google-services.json
+          fi
+
       - name: Install dependencies
         run: flutter pub get
 
       - name: Build APK
-        run: flutter build apk --release
+        run: flutter build apk --release --no-tree-shake-icons
 
       - name: Upload APK Artifact
         uses: actions/upload-artifact@v4

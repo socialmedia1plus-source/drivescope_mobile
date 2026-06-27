@@ -23,22 +23,34 @@ jobs:
         with:
           channel: 'stable'
 
-      - name: Fix Android SDK, Firebase & JVM Target Conflicts
+      - name: Deep Fix Android Files, Package & Manifest Conflicts
         run: |
           # 1. تحديث الـ Compile SDK إلى 36 لحل مشكلة shared_preferences
           find . -name "build.gradle*" -exec sed -i 's/compileSdk = 34/compileSdk = 36/g' {} +
           find . -name "build.gradle*" -exec sed -i 's/compileSdkVersion 34/compileSdkVersion 36/g' {} +
           
-          # 2. تعديل ملف google-services.json تلقائياً ليقبل اسم الحزمة الحالي
-          if [ -f android/app/google-services.json ]; then
-            sed -i 's/"package_name": "[^"]*"/"package_name": "com.example.drivescope_mobile"/g' android/app/google-services.json
-          fi
-          
-          # 3. توحيد الـ JVM Target وإصدارات الجافا داخل ملفات build.gradle لحل التعارض القاتل
+          # 2. توحيد الـ JVM Target وإصدارات الجافا داخل ملفات build.gradle لحل تعارض جافا وكوتلن
           find . -name "build.gradle*" -exec sed -i 's/sourceCompatibility = JavaVersion.VERSION_1_8/sourceCompatibility = JavaVersion.VERSION_17/g' {} +
           find . -name "build.gradle*" -exec sed -i 's/targetCompatibility = JavaVersion.VERSION_1_8/targetCompatibility = JavaVersion.VERSION_17/g' {} +
           find . -name "build.gradle*" -exec sed -i 's/jvmTarget = "1.8"/jvmTarget = "17"/g' {} +
           find . -name "build.gradle*" -exec sed -i 's/jvmTarget = "11"/jvmTarget = "17"/g' {} +
+
+          # 3. العثور الذكي على اسم الحزمة الحقيقي من ملف MainActivity وحل مشكلة الـ ClassNotFoundException
+          REAL_PACKAGE=$(grep -r "package " android/app/src/main/ -h | head -n 1 | sed 's/package //;s/;//;s/[[:space:]]//g')
+          echo "The real package found in code is: $REAL_PACKAGE"
+          
+          if [ ! -z "$REAL_PACKAGE" ]; then
+            # تحديث applicationId في ملف build.gradle ليتطابق مع الحزمة الحقيقية للكود
+            find android/app/ -name "build.gradle*" -exec sed -i "s/applicationId \"[^\"]*\"/applicationId \"$REAL_PACKAGE\"/g" {} +
+            
+            # تحديث ملف الـ Manifest لإجبار الـ activity على قراءة الحزمة الصحيحة تماماً
+            find android/app/src/main/ -name "AndroidManifest.xml" -exec sed -i "s/android:name=\".MainActivity\"/android:name=\"$REAL_PACKAGE.MainActivity\"/g" {} +
+            
+            # 4. تعديل ملف google-services.json تلقائياً ليقبل نفس اسم الحزمة الحقيقي لمنع كراش الفايربيس
+            if [ -f android/app/google-services.json ]; then
+              sed -i "s/\"package_name\": \"[^\"]*\"/\"package_name\": \"$REAL_PACKAGE\"/g" android/app/google-services.json
+            fi
+          fi
 
       - name: Install dependencies
         run: flutter pub get
